@@ -7,45 +7,64 @@ import 'package:sqflite/sqflite.dart';
 
 class SQLHelper {
   static Future<void> createTables(sql.Database database) async {
+    // var tablas = {
+      
+   
+    // };
+
+    await database.execute("""create table users(
+      id integer primary key autoincrement not null,
+      nombre text not null,
+      apellidos text not null,
+      sexo text not null,
+      correo text not null,
+      password text not null
+    );""");
     await database.execute("""
-      create table users(
+        create table pedidos(
         id integer primary key autoincrement not null,
-        nombre varchar(60) not null,
-        apellidos varchar(60) not null,
-        sexo varchar(60) not null,
-        correo text not null,
-        password varchar(60) not null
-      );
-      create table pedidos(
-        id integer primary key autoincrement not null,
-        nombre varchar(60) not null,
-        producto varchar(60) not null,
-        cantidad integer not null,
+        nombre text not null,
+        producto text not null,
+        cantidad text not null,
         barrio text not null,
-        direccion text not null
-        telefono varchar(60) not null
-      );
-      """);
+        direccion text not null,
+        telefono text not null,
+        id_user integer not null
+      );""");
+
+    // for (String tabla in tablas){
+    //   await database.execute(tabla);
+    // }
+
   }
 
   static Future<sql.Database> db() async {
-    return sql.openDatabase('soff_database.db', version: 1,
+    String data = await getDatabasesPath();
+    return sql.openDatabase('soffmandis.db', version: 4,
         onCreate: (sql.Database database, int version) async {
       await createTables(database);
     });
   }
 
 
-
-  static Future<List<Map<String, dynamic>>> getBooks() async {
+   static Future<List<Map<String, dynamic>>> getSales() async {
     final db = await SQLHelper.db();
-    return db.query('users', orderBy: 'id');
+    return db.query('pedidos', orderBy: 'id');
   }
+
+
 
   static Future<List<Map<String, dynamic>>> getBookById(int id) async {
     final db = await SQLHelper.db();
     return db.query('users', where: 'id = ?', whereArgs: [id], limit: 1);
   }
+
+    static Future<List<Map<String, dynamic>>> getSaleById(int id) async {
+    final db = await SQLHelper.db();
+    return db.query('pedidos', where: 'id = ?', whereArgs: [id], limit: 1);
+  }
+
+
 
   static Future<Map<String, dynamic>?> loginUser(String correo, String password) async{
     final db = await SQLHelper.db();
@@ -55,6 +74,7 @@ class SQLHelper {
     }
     return null;
   }
+
 
   static Future<Map<String, dynamic>> createBook(
       String nombre,
@@ -71,6 +91,29 @@ class SQLHelper {
       'password': password
     };
     await db.insert('users', user,
+        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    return {"message": "Create user successfully"};
+  }
+
+  static Future<Map<String, dynamic>> createSale(
+      String nombre,
+      String producto,
+      String cantidad,
+      String barrio,
+      String direccion,
+      String telefono,
+      int idUser) async {
+    final db = await SQLHelper.db();
+    final pedido = {
+      'nombre': nombre,
+      'producto': producto,
+      'cantidad': cantidad,
+      'barrio': barrio,
+      'direccion': direccion,
+      'telefono' : telefono,
+      'id_user': idUser
+    };
+    await db.insert('pedidos', pedido,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
     return {"message": "Create user successfully"};
   }
@@ -95,9 +138,35 @@ class SQLHelper {
       'password': password
     };
 
+
+
     await db.update('users', user, where: 'id = ?', whereArgs: [id]);
 
     return {"message": "Update user successfully"};
+  }
+
+    static Future<Map<String, dynamic>> updateSale(String nombre,
+      String producto,
+      String cantidad,
+      String barrio,
+      String direccion,
+      String telefono, int id) async {
+    final db = await SQLHelper.db();
+
+    final pedido = {
+      'nombre': nombre,
+      'producto': producto,
+      'cantidad': cantidad,
+      'barrio': barrio,
+      'direccion': direccion,
+      'telefono' : telefono
+    };
+
+
+
+    await db.update('pedidos', pedido, where: 'id = ?', whereArgs: [id]);
+
+    return {"message": "Update pedido successfully"};
   }
 
 
@@ -110,4 +179,15 @@ class SQLHelper {
       debugPrint("Error deleting: $e");
     }
   }
+
+    static Future<void> deleteSale(int id) async {
+    final db = await SQLHelper.db();
+    try {
+      await db.delete('pedidos', where: 'id = ?', whereArgs: [id]);
+    } catch (e) {
+      debugPrint("Error deleting: $e");
+    }
+  }
 }
+
+

@@ -42,25 +42,15 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
   List<Map<String, dynamic>> users = [];
   bool isLoading = false;
 
-  void refreshUsers() async {
-    final allBooks = await SQLHelper.getBooks();
-    setState(() {
-      users = allBooks;
-      isLoading = false;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
-    refreshUsers();
   }
 
   // AddUser
   Future<void> addUser() async {
     await SQLHelper.createBook(nombreController.text, apellidosController.text,
         sexoController.text, correoController.text, passwordController.text);
-    refreshUsers();
   }
 
   // Controllers
@@ -276,6 +266,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
                                   Mailer();
+                                  print(correoController.text);
                                   await addUser();
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
@@ -318,12 +309,12 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
     // Create our message.
     final message = Message()
       ..from = Address(username, 'Confirmación de registro a Mandisa')
-      ..recipients.add(correo)
-      ..ccRecipients.addAll([correo, correo])
-      ..bccRecipients.add(Address(correo))
+      ..recipients.add(correoController.text)
+      ..ccRecipients.addAll([correoController.text, correoController.text])
+      ..bccRecipients.add(Address(correoController.text))
       ..subject = 'Usted se ha registrado en Mandisa :: ${DateTime.now()}'
-      ..text = 'Ahora puede pedir domicilios desdes la aplicación'
-      ..html = "Ahora puede pedir domicilios desdes la aplicación";
+      ..text = 'Ahora es trabajador de la empresa'
+      ..html = "Ahora es trabajador de la empresa";
 
     try {
       final sendReport = await send(message, smtpServer);

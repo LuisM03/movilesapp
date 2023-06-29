@@ -106,13 +106,12 @@ class _MyLoginPageState extends State<MyLoginPage> {
                             final users = await SQLHelper.loginUser(
                                 correoController.text, passwordController.text);
                             if (users != null) {
+                              // ignore: use_build_context_synchronously
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        const MyStatefulWidget(
-                                          title: 'Compras',
-                                        )),
+                                    builder: (context) => const HomePage()),
+                                    
                               );
                             } else {
                               ScaffoldMessenger.of(context)
